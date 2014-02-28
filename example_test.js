@@ -1,8 +1,8 @@
 // unlimited stack traces through longjohn
-// var longjohn = require('longjohn');
-// longjohn.async_trace_limit = -1;
+var longjohn = require('longjohn');
+longjohn.async_trace_limit = -1;
 var Q = require('q');
-Q.longStackSupport = true;
+// Q.longStackSupport = true;
 
 var _ = require('lodash/dist/lodash.underscore');
 
@@ -89,6 +89,7 @@ test('debit_card', function (add_card_to_customer){
 
 test('hold_card', function (add_card_to_customer) {
     var cb = this;
+	console.log('add_card_to_customeradd_card_to_customer', add_card_to_customer);
     return add_card_to_customer.hold({amount: 400});
 });
 

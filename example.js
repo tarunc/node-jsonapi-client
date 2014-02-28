@@ -16,7 +16,7 @@ function createBaseAPIClient(apiKey, clientOpts) {
   });
 
   if (apiKey) {
-    clientOptions.auth = {
+    clientOptions.requestOptions.auth = {
       user: apiKey,
       pass: ''
     };
@@ -114,7 +114,7 @@ function Balanced(apiKey, options) {
   balanced.registerType('card_hold', {
     capture: createTransaction('debit'),
     void: function() {
-      return this.unstore()
+      return this.unstore();
     },
 
     card: '_',
