@@ -232,7 +232,7 @@ test('paging_none', function (marketplace) {
 test('paging_first', function (customer_create) {
     var cb = this;
    customer_create.cards.first().then(function (a) {
-        cb.assert(!a);
+        cb.assert(a === null);
         cb();
     });
 });
