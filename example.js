@@ -40,7 +40,7 @@ function Balanced(APIKey, options) {
 
   balanced.marketplace = balanced.get('marketplaces').then(function(marketplace) {
     if (!marketplace) {
-      return balanced.objects.marketplace.create().then(function (mp) {
+      return balanced._objects.marketplace.create().then(function (mp) {
           balanced.marketplace = mp;
           return mp;
       });
@@ -189,11 +189,16 @@ function Balanced(APIKey, options) {
     events: '_'
   });
 
+  function setCustomer(obj) {
+    return (_.isString(obj) ? balanced.get(obj) : balanced._createPromise(obj)).set('links.customer', this.id).save().thenResolve(this);
+  };
+
   return balanced;
 };
 
 Balanced.configure = function(APIKey, options) {
-  var balanced = new Balanced(APIKey, options);
+  var balanced = Balanced(APIKey, options);
+  // console.log('balanced', balanced);
   return balanced;
 };
 
@@ -216,10 +221,6 @@ Balanced.api_key = {
 Balanced.defaultOptions = defaultOptions;
 
 module.exports = Balanced;
-
-function setCustomer(obj) {
-  return (_.isString(obj) ? balanced.get(obj) : balanced.createPromise(obj)).set('links.customer', this.id).save().thenResolve(this);
-};
 
 function createTransaction(type) {
   return function(args) {
