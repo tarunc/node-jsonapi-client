@@ -5,25 +5,36 @@ var defaultOptions = {
 
 };
 
-function Balanced(APIKey, options) {
-  // Extend the default options
-  var opts = _.defaults(options || {}, Balanced.defaultOptions);
-
-  // Create the balanced api client
-  var balanced = new JSONAPIClient('https://api.balancedpayments.com', {
+function createBaseAPIClient(apiKey, clientOpts) {
+  var clientOptions = _.extend({}, clientOpts || {}, {
     requestOptions: {
       headers: {
         'Accept': 'application/vnd.balancedpayments+json; version=1.1, application/vnd.api+json',
         'User-Agent': 'balanced-node/1.1.0'
-      },
-      auth: {
-        user: APIKey,
-        pass: ''
       }
     }
   });
 
+  if (apiKey) {
+    clientOptions.auth = {
+      user: apiKey,
+      pass: ''
+    };
+  }
+
+  var balanced = new JSONAPIClient('https://api.balancedpayments.com', clientOptions);
   balanced.registerType('api_key');
+
+  return balanced;
+};
+
+function Balanced(apiKey, options) {
+  // Extend the default options
+  var opts = _.defaults(options || {}, Balanced.defaultOptions);
+
+  // Create the balanced api client
+  var balanced = createBaseAPIClient(apiKey, opts.client);
+
   balanced.registerType('marketplace', {
     'debits': '_',
     'reversals': '_',
@@ -40,9 +51,9 @@ function Balanced(APIKey, options) {
 
   balanced.marketplace = balanced.get('marketplaces').then(function(marketplace) {
     if (!marketplace) {
-      return balanced._objects.marketplace.create().then(function (mp) {
-          balanced.marketplace = mp;
-          return mp;
+      return balanced._objects.marketplace.create().then(function(mp) {
+        balanced.marketplace = mp;
+        return mp;
       });
     }
 
@@ -193,30 +204,22 @@ function Balanced(APIKey, options) {
     return (_.isString(obj) ? balanced.get(obj) : balanced._createPromise(obj)).set('links.customer', this.id).save().thenResolve(this);
   };
 
+  // _.extend(this, balanced);
+
   return balanced;
 };
 
-Balanced.configure = function(APIKey, options) {
-  var balanced = Balanced(APIKey, options);
-  // console.log('balanced', balanced);
-  return balanced;
+Balanced.configure = function(apiKey, options) {
+   var b = Balanced(apiKey, options);
+   return b;
 };
 
 Balanced.api_key = {
-	create: function() {
-	    var balanced = new JSONAPIClient('https://api.balancedpayments.com', {
-	      requestOptions: {
-	        headers: {
-	          'Accept': 'application/vnd.balancedpayments+json; version=1.1, application/vnd.api+json',
-	          'User-Agent': 'balanced-node/1.1.0'
-	        }
-	      }
-	    });
-
-		balanced.registerType('api_key');
-		return balanced.api_key.create();
-	}
-}
+  create: function() {
+    var b = createBaseAPIClient();
+    return b.api_key.create();
+  }
+};
 
 Balanced.defaultOptions = defaultOptions;
 
